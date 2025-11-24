@@ -271,7 +271,7 @@ class GameState:
         self.exchange_actor_id = None
         self.exchange_cards = None
         self.loss_choice_player_id = None
-        self._post_loss_action = None
+               self._post_loss_action = None
         self._next_turn_after_loss = False
 
         # Income (non-blockable)
@@ -593,8 +593,17 @@ class GameState:
             requires_two=requires_two,
         )
         self.phase = "challenge_window"
+
+        # NEW: clarify what they blocked steal with
+        if block_type == "block_steal_captain":
+            with_text = " with Captain"
+        elif block_type == "block_steal_ambassador":
+            with_text = " with Ambassador"
+        else:
+            with_text = ""
+
         self._log(
-            f"{blocker.name} attempts to block {actor.name}'s {self._human_action(action)}."
+            f"{blocker.name} attempts to block {actor.name}'s {self._human_action(action)}{with_text}."
         )
 
     def player_no_block(self, player_id: str) -> None:
