@@ -329,7 +329,11 @@ function buildCurrentActionSummary(view: GameView): string | null {
         : null;
     const base = humanAction(pa.action);
     const actionPhrase = formatActionPhrase(base, pa.action, targetName);
+    const blockRole = humanBlockRole(pb.block_type);
 
+    if (blockRole) {
+      return `${blocker.name} attempts to block ${actor.name}'s ${actionPhrase} with ${blockRole}`;
+    }
     return `${blocker.name} attempts to block ${actor.name}'s ${actionPhrase}`;
   }
 
@@ -573,6 +577,8 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
       const actor = view.players[pa.actor_id];
       if (!blocker || !actor) return null;
 
+      const blockRole = humanBlockRole(pb.block_type);
+
       const targetPlayer =
         pa.target_id && view.players[pa.target_id]
           ? view.players[pa.target_id]
@@ -598,15 +604,21 @@ const ActionPanel: React.FC<ActionPanelProps> = ({
       const actorLabel = isYouActor ? "your" : `${actor.name}'s`;
 
       if (isYouBlocker) {
-        text = `You are attempting to block ${actorLabel} ${actionPhrase}.`;
+        text = blockRole
+          ? `You are attempting to block ${actorLabel} ${actionPhrase} with ${blockRole}.`
+          : `You are attempting to block ${actorLabel} ${actionPhrase}.`;
         canChallenge = false;
       } else if (blockerSameTeam) {
         const whose = isYouActor ? "your" : `${actor.name}'s`;
-        text = `Your teammate ${blocker.name} is attempting to block ${whose} ${actionPhrase}.`;
+        text = blockRole
+          ? `Your teammate ${blocker.name} is attempting to block ${whose} ${actionPhrase} with ${blockRole}.`
+          : `Your teammate ${blocker.name} is attempting to block ${whose} ${actionPhrase}.`;
         canChallenge = false;
       } else {
         const whose = isYouActor ? "your" : `${actor.name}'s`;
-        text = `Opponent ${blocker.name} is attempting to block ${whose} ${actionPhrase}.`;
+        text = blockRole
+          ? `Opponent ${blocker.name} is attempting to block ${whose} ${actionPhrase} with ${blockRole}.`
+          : `Opponent ${blocker.name} is attempting to block ${whose} ${actionPhrase}.`;
         canChallenge = you.alive;
       }
     } else if (pa) {
@@ -1125,6 +1137,23 @@ function humanAction(action: string): string {
       return "Super Coup";
     default:
       return action;
+  }
+}
+
+function humanBlockRole(blockType: string): string | null {
+  switch (blockType) {
+    case "block_foreign_aid":
+      return "Duke";
+    case "block_steal_captain":
+      return "Captain";
+    case "block_steal_ambassador":
+      return "Ambassador";
+    case "block_assassinate":
+      return "Contessa";
+    case "block_coup":
+      return "Super Contessa";
+    default:
+      return null;
   }
 }
 

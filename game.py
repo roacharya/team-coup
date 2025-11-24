@@ -200,6 +200,29 @@ class GameState:
         # Actions that go through challenge_window first, then can be blocked
         return action in ("steal", "super_steal", "assassinate", "super_assassinate")
 
+    def _replace_claim_card(self, player: Player, role: Role) -> None:
+        """
+        When a claim (action or block) is successfully defended,
+        the claimed card is shuffled back into the deck and the player
+        draws a replacement card. This is private; only the log says
+        that they drew a new card, not which card it is.
+        """
+        try:
+            idx = player.cards.index(role)
+        except ValueError:
+            # Shouldn't happen if we already checked counts, but be safe.
+            return
+
+        # Put the revealed card back into the deck and draw a replacement.
+        self.deck.append(role)
+        random.shuffle(self.deck)
+        new_card = self._draw_card()
+        player.cards[idx] = new_card
+
+        self._log(
+            f"{player.name}'s {role} claim was correct. {player.name} draws a new influence card."
+        )
+
     # ──────────────────────────────────────────────────────────────────────
     # Main action entry
     # ──────────────────────────────────────────────────────────────────────
@@ -436,6 +459,7 @@ class GameState:
 
             if actual_count >= needed:
                 # Block is truthful; challenger loses card, block stands
+                self._replace_claim_card(blocker, role)
                 self._log(
                     f"{challenger.name} challenges {blocker.name}'s block and loses the challenge."
                 )
@@ -465,6 +489,7 @@ class GameState:
 
         if actual_count >= needed:
             # Actor truthful, challenger loses one influence, action goes through
+            self._replace_claim_card(actor, role)
             self._log(
                 f"{challenger.name} challenges {actor.name}'s {role} and loses the challenge."
             )
