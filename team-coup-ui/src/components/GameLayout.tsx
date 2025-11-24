@@ -52,8 +52,6 @@ const GameLayout: React.FC<Props> = ({
     }
   }, [view.logs.length]);
 
-  const superMode = view.mode === "super_team";
-
   // Rotate turn order so you're always bottom seat (index 0), then clockwise
   const orderedIds = view.turn_order;
   const youIndex = orderedIds.indexOf(you.player_id);
