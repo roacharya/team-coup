@@ -271,7 +271,7 @@ class GameState:
         self.exchange_actor_id = None
         self.exchange_cards = None
         self.loss_choice_player_id = None
-               self._post_loss_action = None
+        self._post_loss_action = None
         self._next_turn_after_loss = False
 
         # Income (non-blockable)
